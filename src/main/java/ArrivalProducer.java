@@ -15,9 +15,6 @@ public class ArrivalProducer {
     static double totalArrivalrate;
     static {
         topicpartitions = new ArrayList<>();
-
-
-
         for (int i = 0; i <= 4; i++) {
             topicpartitions.add(new Partition(i, 0, 0));
 

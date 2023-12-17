@@ -13,23 +13,20 @@ import java.util.Properties;
 public class BinPackRestructure {
 
     private static final Logger log = LogManager.getLogger(BinPackRestructure.class);
-    public static   int size =1;
+    public static int size = 1;
     public Instant LastUpScaleDecision = Instant.now();
     static double wsla = 0.5;
-    static String action = "none";
     static List<Consumer> assignment = new ArrayList<Consumer>();
     static List<Consumer> currentAssignment = assignment;
-    static List<Consumer> tempAssignment = assignment;
     private static KafkaConsumer<byte[], byte[]> metadataConsumer;
 
-
     static List<Partition> partsReset;
-    
-    
+
+
     static {
-        currentAssignment.add(new Consumer("0",  (long)(175f*wsla*.9),
-                175f*.9));
-        for (Partition p  : ArrivalProducer.topicpartitions ) {
+        currentAssignment.add(new Consumer("0", (long) (175f * wsla * .9),
+                175f * .9));
+        for (Partition p : ArrivalProducer.topicpartitions) {
             currentAssignment.get(0).assignPartition(p);
         }
     }
@@ -50,7 +47,7 @@ public class BinPackRestructure {
                     log.info("I have Upscaled group {} you should have {}", "testgroup1", neededsize);
                 }
                 currentAssignment = assignment;
-                size=neededsize;
+                size = neededsize;
                 return;
             }
         } else {
@@ -71,21 +68,17 @@ public class BinPackRestructure {
     }
 
 
-
-
-
-
-    private static  boolean assignmentViolatesTheSLA2() {
+    private static boolean assignmentViolatesTheSLA2() {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
             double sumPartitionsLag = 0;
-            for (Partition p: cons.getAssignedPartitions()) {
-                sumPartitionsArrival +=  ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
-                sumPartitionsLag +=  ArrivalProducer.topicpartitions.get(p.getId()).getLag();
+            for (Partition p : cons.getAssignedPartitions()) {
+                sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
+                sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
 
-            if ( sumPartitionsLag>  (long) (wsla*175f*.9f)||
-                    sumPartitionsArrival > 175f*0.9f) {
+            if (sumPartitionsLag > (long) (wsla * 175f * .9f) ||
+                    sumPartitionsArrival > 175f * 0.9f) {
                 log.info("Assignment violates the SLA");
                 return true;
             }
@@ -95,15 +88,13 @@ public class BinPackRestructure {
     }
 
 
-
-
-    private static  void resetPartitions(float f) {
+    private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
         for (Partition partition : partsReset) {
-            if (partition.getLag() > 175*wsla * f) {
+            if (partition.getLag() > 175 * wsla * f) {
                 log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" +
-                        " we are truncating its lag", partition.getId(), partition.getLag(), 175*wsla* f);
-                partition.setLag((long)(175*wsla* f));
+                        " we are truncating its lag", partition.getId(), partition.getLag(), 175 * wsla * f);
+                partition.setLag((long) (175 * wsla * f));
             }
         }
         //if a certain partition has an arrival rate  higher than R  set its arrival rate  to R
@@ -113,16 +104,15 @@ public class BinPackRestructure {
                 log.info("Since partition {} has arrival rate {} higher than consumer service rate {}" +
                                 " we are truncating its arrival rate", partition.getId(),
                         String.format("%.2f", partition.getArrivalRate()),
-                        String.format("%.2f",175f * f ));
-                partition.setArrivalRate(175f* f );
+                        String.format("%.2f", 175f * f));
+                partition.setArrivalRate(175f * f);
             }
         }
 
     }
 
 
-
-    private static   int binPackAndScale() {
+    private static int binPackAndScale() {
         log.info(" shall we upscale group {}", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
@@ -134,8 +124,8 @@ public class BinPackRestructure {
             int j;
             consumers.clear();
             for (int t = 0; t < consumerCount; t++) {
-                consumers.add(new Consumer((String.valueOf(t)),  (long)(175*wsla*fraction),
-                        175*fraction));
+                consumers.add(new Consumer((String.valueOf(t)), (long) (175 * wsla * fraction),
+                        175 * fraction));
             }
 
             for (j = 0; j < partsReset.size(); j++) {
@@ -157,19 +147,16 @@ public class BinPackRestructure {
                 break;
         }
         assignment = consumers;
-        tempAssignment = consumers;
         log.info(" The BP up scaler recommended for group {} {}", "testgroup1", consumers.size());
         return consumers.size();
     }
 
 
-
-
-    static  int binPackAndScaled() {
+    static int binPackAndScaled() {
         log.info(" shall we down scale group {} ", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
-        double fractiondynamicAverageMaxConsumptionRate = 175*0.4;
+        double fractiondynamicAverageMaxConsumptionRate = 175 * 0.4;
 
         //start the bin pack FFD with sort
         Collections.sort(partsReset, Collections.reverseOrder());
@@ -178,7 +165,7 @@ public class BinPackRestructure {
             consumers.clear();
             for (int t = 0; t < consumerCount; t++) {
                 consumers.add(new Consumer((String.valueOf(consumerCount)),
-                        (long)(fractiondynamicAverageMaxConsumptionRate*wsla),
+                        (long) (fractiondynamicAverageMaxConsumptionRate * wsla),
                         fractiondynamicAverageMaxConsumptionRate));
             }
 
