@@ -8,7 +8,10 @@ import java.util.concurrent.ExecutionException;
 public class Main {
 
     private static final Logger log = LogManager.getLogger(Main.class);
-     static BinPackRestructure bp;
+    // static BinPackRestructure bp;
+
+    static BinPackRestructureWithLag bp;
+
     /* static BinPackState bps;
     static BinPackLag bpl;*/
 
@@ -22,7 +25,9 @@ public class Main {
        /* bps = new BinPackState();
         bpl = new BinPackLag();*/
 
-        bp = new BinPackRestructure();
+       // bp = new BinPackRestructure();
+        bp = new BinPackRestructureWithLag();
+
         Lag.readEnvAndCrateAdminClient();
         log.info("Warming 15  seconds.");
         Thread.sleep(15 * 1000);
@@ -38,7 +43,7 @@ public class Main {
             log.info("Sleeping for 5 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(5000);
+            Thread.sleep(1000);
         }
     }
 
@@ -49,7 +54,7 @@ public class Main {
     private static void scaleLogic() throws InterruptedException {
 
         if  (Duration.between(bp.LastUpScaleDecision, Instant.now()).getSeconds() > 10) {
-            BinPackRestructure.scaleAsPerBinPackRestructured();
+            BinPackRestructureWithLag.scaleAsPerBinPackRestructured();
         } else {
             log.info("No scale group 1 cooldown");
         }

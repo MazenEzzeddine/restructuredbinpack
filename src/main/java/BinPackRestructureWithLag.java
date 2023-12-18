@@ -8,14 +8,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
-public class BinPackRestructure {
+public class BinPackRestructureWithLag {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructure.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLag.class);
     public static int size = 1;
     public Instant LastUpScaleDecision = Instant.now();
     static double wsla = 0.5;
+    static double rebTime = 2.0;
     static List<Consumer> assignment = new ArrayList<Consumer>();
     static List<Consumer> currentAssignment = assignment;
     private static KafkaConsumer<byte[], byte[]> metadataConsumer;
@@ -36,7 +36,6 @@ public class BinPackRestructure {
         log.info("Currently we have this number of consumers group {} {}", "testgroup1", size);
         if (assignmentViolatesTheSLA2()) {
             resetPartitions(0.9f);
-
             int neededsize = binPackAndScale();
             log.info("We currently need the following consumers for group1 (as per the bin pack) {}", neededsize);
             int replicasForscale = neededsize - size;
@@ -78,9 +77,7 @@ public class BinPackRestructure {
                 sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
 
-            log.info("consumer co {}, lagsum {}, arrival sum {}", cons.getId(), sumPartitionsLag, sumPartitionsArrival);
-
-            if (sumPartitionsLag >  (wsla * 175f * .9f) ||
+            if (sumPartitionsLag > (wsla * 175f * .9f) ||
                     sumPartitionsArrival > 175f * 0.9f) {
                 log.info("Assignment violates the SLA");
                 return true;
@@ -93,6 +90,14 @@ public class BinPackRestructure {
 
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
+
+        ///// add lag resulting from rebelancing
+
+        for (int i = 0; i < 5; i++) {
+            partsReset.get(i).setLag(ArrivalProducer.topicpartitions.get(i).getLag()
+                    + (long) ((ArrivalProducer.totalArrivalrate * rebTime)/5.0));
+        }
+
         for (Partition partition : partsReset) {
             if (partition.getLag() > 175 * wsla * f) {
                 log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" +
@@ -193,7 +198,6 @@ public class BinPackRestructure {
         }
 
         assignment = consumers;
-
 
         log.info(" The BP down scaler recommended  for group {} {}", "testgroup1", consumers.size());
         return consumers.size();
