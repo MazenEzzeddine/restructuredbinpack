@@ -9,16 +9,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLag {
+public class BinPackRestructuredown {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLag.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructuredown.class);
     public static int size = 1;
+    public Instant LastUpScaleDecision = Instant.now();
     static double wsla = 0.5;
-    static double rebTime = 2.0;
     static List<Consumer> assignment = new ArrayList<Consumer>();
     static List<Consumer> currentAssignment = assignment;
-    static List<Partition> partsReset;
     private static KafkaConsumer<byte[], byte[]> metadataConsumer;
+
+    static List<Partition> partsReset;
+
 
     static {
         currentAssignment.add(new Consumer("0", (long) (175f * wsla * .9),
@@ -28,12 +30,12 @@ public class BinPackRestructureWithLag {
         }
     }
 
-    public Instant LastUpScaleDecision = Instant.now();
 
     public static void scaleAsPerBinPackRestructured() {
         log.info("Currently we have this number of consumers group {} {}", "testgroup1", size);
         if (assignmentViolatesTheSLA2()) {
-            resetPartitions(0.9f);
+            resetPartitions(0.4f);
+
             int neededsize = binPackAndScale();
             log.info("We currently need the following consumers for group1 (as per the bin pack) {}", neededsize);
             int replicasForscale = neededsize - size;
@@ -75,7 +77,10 @@ public class BinPackRestructureWithLag {
                 sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
 
-            if (sumPartitionsLag > (wsla * 175f * .9f) || sumPartitionsArrival > 175f * 0.9f) {
+            log.info("consumer co {}, lagsum {}, arrival sum {}", cons.getId(), sumPartitionsLag, sumPartitionsArrival);
+
+            if (sumPartitionsLag >  (wsla * 175f * .9f) ||
+                    sumPartitionsArrival > 175f * 0.9f) {
                 log.info("Assignment violates the SLA");
                 return true;
             }
@@ -87,18 +92,10 @@ public class BinPackRestructureWithLag {
 
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
-
-        ///// add lag resulting from rebelancing
-
-        for (int i = 0; i < 5; i++) {
-            partsReset.get(i).setLag(ArrivalProducer.topicpartitions.get(i).getLag()
-                    + (long) ((ArrivalProducer.totalArrivalrate * rebTime) / 5.0));
-        }
-
         for (Partition partition : partsReset) {
             if (partition.getLag() > 175 * wsla * f) {
-                log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" + " we are truncating its lag",
-                        partition.getId(), partition.getLag(), 175 * wsla * f);
+                log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" +
+                        " we are truncating its lag", partition.getId(), partition.getLag(), 175 * wsla * f);
                 partition.setLag((long) (175 * wsla * f));
             }
         }
@@ -107,8 +104,9 @@ public class BinPackRestructureWithLag {
         for (Partition partition : partsReset) {
             if (partition.getArrivalRate() > 175 * f) {
                 log.info("Since partition {} has arrival rate {} higher than consumer service rate {}" +
-                        " we are truncating its arrival rate", partition.getId(),
-                        String.format("%.2f", partition.getArrivalRate()), String.format("%.2f", 175f * f));
+                                " we are truncating its arrival rate", partition.getId(),
+                        String.format("%.2f", partition.getArrivalRate()),
+                        String.format("%.2f", 175f * f));
                 partition.setArrivalRate(175f * f);
             }
         }
@@ -120,7 +118,7 @@ public class BinPackRestructureWithLag {
         log.info(" shall we upscale group {}", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
-        float fraction = 0.9f;
+        float fraction = 0.4f;
         //start the bin pack FFD with sort
         Collections.sort(partsReset, Collections.reverseOrder());
 
@@ -128,7 +126,8 @@ public class BinPackRestructureWithLag {
             int j;
             consumers.clear();
             for (int t = 0; t < consumerCount; t++) {
-                consumers.add(new Consumer((String.valueOf(t)), (long) (175 * wsla * fraction), 175 * fraction));
+                consumers.add(new Consumer((String.valueOf(t)), (long) (175 * wsla * fraction),
+                        175 * fraction));
             }
 
             for (j = 0; j < partsReset.size(); j++) {
@@ -146,7 +145,8 @@ public class BinPackRestructureWithLag {
                     break;
                 }
             }
-            if (j == partsReset.size()) break;
+            if (j == partsReset.size())
+                break;
         }
         assignment = consumers;
         log.info(" The BP up scaler recommended for group {} {}", "testgroup1", consumers.size());
@@ -176,8 +176,8 @@ public class BinPackRestructureWithLag {
                 Collections.sort(consumers, Collections.reverseOrder());
                 for (i = 0; i < consumerCount; i++) {
 
-                    if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag()
-                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate()) {
+                    if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag() &&
+                            consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate()) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }
@@ -187,9 +187,9 @@ public class BinPackRestructureWithLag {
                     break;
                 }
             }
-            if (j == partsReset.size()) break;
+            if (j == partsReset.size())
+                break;
         }
-
         assignment = consumers;
 
         log.info(" The BP down scaler recommended  for group {} {}", "testgroup1", consumers.size());

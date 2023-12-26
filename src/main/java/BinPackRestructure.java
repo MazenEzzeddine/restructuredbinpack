@@ -191,9 +191,7 @@ public class BinPackRestructure {
             if (j == partsReset.size())
                 break;
         }
-
         assignment = consumers;
-
 
         log.info(" The BP down scaler recommended  for group {} {}", "testgroup1", consumers.size());
         return consumers.size();
