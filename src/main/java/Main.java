@@ -43,7 +43,7 @@ public class Main {
             log.info("Sleeping for 5 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(1000);
+            Thread.sleep(5000);
         }
     }
 
@@ -54,7 +54,7 @@ public class Main {
     private static void scaleLogic() throws InterruptedException {
 
         if  (Duration.between(bp.LastUpScaleDecision, Instant.now()).getSeconds() > 10) {
-            BinPackRestructureWithLag.scaleAsPerBinPackRestructured();
+            BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
         } else {
             log.info("No scale group 1 cooldown");
         }

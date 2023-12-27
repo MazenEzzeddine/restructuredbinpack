@@ -63,15 +63,5 @@ public class Lag {
     }
 
 
-   /*static  void addParentLag (long totalLag) {
 
-        double childarrivalrate = totalLag/0.5;
-        log.info("after adding parent lag : Arrival rate into testtopic2");
-        double totalArrivalRate = childarrivalrate + ArrivalProducer.totalArrivalrate;
-       for (int i = 0; i < 5; i++) {
-           ArrivalProducer.topicpartitions2.get(i).setArrivalRate(totalArrivalRate/5.0);
-
-       }
-
-    }*/
 }

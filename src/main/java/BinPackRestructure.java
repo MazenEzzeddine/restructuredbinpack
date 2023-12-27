@@ -100,7 +100,7 @@ public class BinPackRestructure {
                 partition.setLag((long) (175 * wsla * f));
             }
         }
-        //if a certain partition has an arrival rate  higher than R  set its arrival rate  to R
+        //if a certain partition has an arrival rate  higher than µ  set its arrival rate  to µ
         //that should not happen in a well partionned topic
         for (Partition partition : partsReset) {
             if (partition.getArrivalRate() > 175 * f) {
@@ -122,7 +122,6 @@ public class BinPackRestructure {
         float fraction = 0.9f;
         //start the bin pack FFD with sort
         Collections.sort(partsReset, Collections.reverseOrder());
-
         while (true) {
             int j;
             consumers.clear();
