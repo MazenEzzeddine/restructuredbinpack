@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLagLag {
+public class BinPackRestructureWithLagLagConstant {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLagConstant.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -21,8 +21,8 @@ public class BinPackRestructureWithLagLag {
     private static KafkaConsumer<byte[], byte[]> metadataConsumer;
 
     static {
-        currentAssignment.add(new Consumer("0", (long) (175f * wsla * .9),
-                175f * .9));
+        currentAssignment.add(new Consumer("0", (long) (200f * wsla * .9),
+                200f * .9));
         for (Partition p : ArrivalProducer.topicpartitions) {
             currentAssignment.get(0).assignPartition(p);
         }
@@ -80,9 +80,9 @@ public class BinPackRestructureWithLagLag {
                 sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
                 sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
-            double arrivalwhileprocessing = sumPartitionsLag / (175f * 0.9) * sumPartitionsArrival;
+            double arrivalwhileprocessing = sumPartitionsLag / (200f * 0.9) * sumPartitionsArrival;
 
-            if ((sumPartitionsLag + arrivalwhileprocessing) >= (wsla * 175f * .9f) || sumPartitionsArrival >= 175f * 0.9f) {
+            if ((sumPartitionsLag + arrivalwhileprocessing) >= (wsla * 200f * .9f) || sumPartitionsArrival >= 200f * 0.9f) {
                 log.info("Assignment violates the SLA");
                 return true;
             }
@@ -95,18 +95,18 @@ public class BinPackRestructureWithLagLag {
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
         for (Partition partition : partsReset) {
-            if (partition.getLag() > 175 * wsla * f) {
+            if (partition.getLag() > 200 * wsla * f) {
                 log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" + " we are truncating its lag",
-                        partition.getId(), partition.getLag(), 175 * wsla * f);
-                partition.setLag((long) (175 * wsla * f));
+                        partition.getId(), partition.getLag(), 200 * wsla * f);
+                partition.setLag((long) (200 * wsla * f));
             }
         }
         for (Partition partition : partsReset) {
-            if (partition.getArrivalRate() > 175 * f) {
+            if (partition.getArrivalRate() > 200 * f) {
                 log.info("Since partition {} has arrival rate {} higher than consumer service rate {}" +
                                 " we are truncating its arrival rate", partition.getId(),
-                        String.format("%.2f", partition.getArrivalRate()), String.format("%.2f", 175f * f));
-                partition.setArrivalRate(175f * f);
+                        String.format("%.2f", partition.getArrivalRate()), String.format("%.2f", 200f * f));
+                partition.setArrivalRate(200f * f);
             }
         }
     }
@@ -124,7 +124,7 @@ public class BinPackRestructureWithLagLag {
             int j;
             consumers.clear();
             for (int t = 0; t < consumerCount; t++) {
-                consumers.add(new Consumer((String.valueOf(t)), (long) (175 * wsla * fraction), 175 * fraction));
+                consumers.add(new Consumer((String.valueOf(t)), (long) (200 * wsla * fraction), 200 * fraction));
             }
             for (j = 0; j < partsReset.size(); j++) {
                 int i;
@@ -154,8 +154,8 @@ public class BinPackRestructureWithLagLag {
    //can we assign this partition to thsi consumer
     private static boolean isOK(Consumer consumer, Partition partition, double f) {
 
-   /*      double timetoconsumelag = (175*wsla*f - consumer.getRemainingLagCapacity())/(175*f);
-         double arrivalwhileconsuming = timetoconsumelag * (175-consumer.getRemainingArrivalCapacity());*/
+   /*      double timetoconsumelag = (200*wsla*f - consumer.getRemainingLagCapacity())/(200*f);
+         double arrivalwhileconsuming = timetoconsumelag * (200-consumer.getRemainingArrivalCapacity());*/
 
 
         log.info("consumer {}", consumer.getId());
@@ -170,7 +170,7 @@ public class BinPackRestructureWithLagLag {
 
         log.info("sumPartitionsArrival {}", sumPartitionsArrival);
         log.info("sumPartitionsLag {}", sumPartitionsLag);
-        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (175f * f) * sumPartitionsArrival;
+        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (200f * f) * sumPartitionsArrival;
 
 
         log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
@@ -180,12 +180,12 @@ public class BinPackRestructureWithLagLag {
         double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
 
 
-/*        if (total > 175f * wsla * f) {
-            total = 175f * wsla * f;
-        }*/
+        if (total > 200f * wsla * f) {
+            total = 200f * wsla * f;
+        }
 
 
-        if (total <= 175f * wsla * f) {
+        if (total <= 200f * wsla * f) {
             // log.info("true");
             return true;
         }
@@ -198,7 +198,7 @@ public class BinPackRestructureWithLagLag {
         log.info(" shall we down scale group {} ", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
-        double fractiondynamicAverageMaxConsumptionRate = 175 * 0.4;
+        double fractiondynamicAverageMaxConsumptionRate = 200 * 0.4;
 
         //start the bin pack FFD with sort
         Collections.sort(partsReset, Collections.reverseOrder());
