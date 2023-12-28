@@ -180,9 +180,6 @@ public class BinPackRestructureWithLagLag {
         double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
 
 
-/*        if (total > 175f * wsla * f) {
-            total = 175f * wsla * f;
-        }*/
 
 
         if (total <= 175f * wsla * f) {
