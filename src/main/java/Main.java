@@ -43,7 +43,7 @@ public class Main {
             log.info("Sleeping for 5 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(5000);
+            Thread.sleep(1000);
         }
     }
 

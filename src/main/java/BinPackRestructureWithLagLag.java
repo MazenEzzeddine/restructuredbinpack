@@ -49,7 +49,7 @@ public class BinPackRestructureWithLagLag {
                 return;
             }
         } else {
-           // resetPartitions(0.9f);
+           resetPartitions(0.4f);
             int neededsized = binPackAndScaled();
             int replicasForscaled = size - neededsized;
             if (replicasForscaled > 0) {
@@ -70,7 +70,13 @@ public class BinPackRestructureWithLagLag {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
             double sumPartitionsLag = 0;
+
+
+            log.info("consumer {}", cons.getId());
+
+
             for (Partition p : cons.getAssignedPartitions()) {
+                log.info("partition {}", p.getId());
                 sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
                 sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
@@ -149,10 +155,12 @@ public class BinPackRestructureWithLagLag {
          double arrivalwhileconsuming = timetoconsumelag * (175-consumer.getRemainingArrivalCapacity());*/
 
 
+        log.info("consumer {}", consumer.getId());
+
+
+
         double sumPartitionsArrival = 0;
         double sumPartitionsLag = 0;
-
-
 
         for (Partition p : consumer.getAssignedPartitions()) {
             sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
@@ -160,17 +168,33 @@ public class BinPackRestructureWithLagLag {
         }
 
 
-        double arrivalwhileprocessing = sumPartitionsLag/(175*0.9) * sumPartitionsArrival;
+        log.info("sumPartitionsArrival {}",sumPartitionsArrival);
+        log.info("sumPartitionsLag {}", sumPartitionsLag);
 
 
-        if (partition.getLag() + arrivalwhileprocessing /*arrivalwhileconsuming*/ < 175*wsla*f) {
-            log.info("true");
-            return true;
+        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag())/(175f*0.9) * sumPartitionsArrival;
+
+
+        log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
+
+        log.info("partition.getLag() {}", partition.getLag());
+
+
+        double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
+
+
+        if(total > 175f*wsla*f) {
+
+            total = 175f*wsla*f;
+
         }
 
 
-        log.info("false");
-
+        if (total  /*arrivalwhileconsuming*/ <= 175f*wsla*f) {
+           // log.info("true");
+            return true;
+        }
+      //  log.info("false");
         return  false;
     }
 
