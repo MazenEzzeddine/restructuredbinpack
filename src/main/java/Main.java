@@ -53,11 +53,14 @@ public class Main {
 
     private static void scaleLogic() throws InterruptedException {
 
-        if  (Duration.between(bp.LastUpScaleDecision, Instant.now()).getSeconds() > 10) {
-            BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
+     /*   if  (Duration.between(bp.LastUpScaleDecision, Instant.now()).getSeconds() > 10) {
         } else {
             log.info("No scale group 1 cooldown");
-        }
+        }*/
+
+
+        BinPackRestructure200.scaleAsPerBinPackRestructured();
+
 
 
     }
