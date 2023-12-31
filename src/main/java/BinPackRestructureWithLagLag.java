@@ -70,11 +70,7 @@ public class BinPackRestructureWithLagLag {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
             double sumPartitionsLag = 0;
-
-
             log.info("consumer {}", cons.getId());
-
-
             for (Partition p : cons.getAssignedPartitions()) {
                 log.info("partition {}", p.getId());
                 sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
