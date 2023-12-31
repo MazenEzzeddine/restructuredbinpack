@@ -113,7 +113,6 @@ public class BinPackRestructureWithLagLag {
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
         float fraction = 0.9f;
-        //start the bin pack FFD with sort
         Collections.sort(partsReset, Collections.reverseOrder());
 
         while (true) {
@@ -150,12 +149,7 @@ public class BinPackRestructureWithLagLag {
    //can we assign this partition to thsi consumer
     private static boolean isOK(Consumer consumer, Partition partition, double f) {
 
-   /*      double timetoconsumelag = (175*wsla*f - consumer.getRemainingLagCapacity())/(175*f);
-         double arrivalwhileconsuming = timetoconsumelag * (175-consumer.getRemainingArrivalCapacity());*/
-
-
         log.info("consumer {}", consumer.getId());
-
         double sumPartitionsArrival = 0;
         double sumPartitionsLag = 0;
 
@@ -171,12 +165,7 @@ public class BinPackRestructureWithLagLag {
 
         log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
         log.info("partition.getLag() {}", partition.getLag());
-
-
         double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
-
-
-
 
         if (total <= 200f * wsla * f) {
             // log.info("true");
