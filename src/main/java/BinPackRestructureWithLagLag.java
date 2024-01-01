@@ -69,7 +69,6 @@ public class BinPackRestructureWithLagLag {
     }
 
 
-/*
     private static boolean assignmentViolatesTheSLA2() {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
@@ -90,10 +89,9 @@ public class BinPackRestructureWithLagLag {
         log.info("Assignment  does NOT  violates the SLA");
         return false;
     }
-*/
 
 
-    private static boolean assignmentViolatesTheSLA2() {
+  /*  private static boolean assignmentViolatesTheSLA2() {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
             double sumPartitionsLag = 0;
@@ -111,7 +109,7 @@ public class BinPackRestructureWithLagLag {
         }
         return false;
     }
-
+*/
 
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
@@ -188,9 +186,6 @@ public class BinPackRestructureWithLagLag {
             partsReset.get(partition.getId()).setLag((long)(partition.getLag() - arrivalTopartition));
         }
 
-
-
-
         for (Partition p : consumer.getAssignedPartitions()) {
             sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
             sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
@@ -201,22 +196,55 @@ public class BinPackRestructureWithLagLag {
         double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (200f * f) *
                 (sumPartitionsArrival + partition.getArrivalRate());
 
-
         log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
         log.info("partition.getLag() {}", partition.getLag());
         double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
 
-/*        if (total > 200f * wsla * f) {
-            total = 200f * wsla * f;
-        }*/
-
         if (total <= 200f * wsla * f) {
-            // log.info("true");
             return true;
         }
         //  log.info("false");
         return false;
     }
+
+
+
+    //can we assign this partition to thsi consumer
+/*   private static boolean isOK(Consumer consumer, Partition partition, double f) {
+
+        log.info("consumer {}", consumer.getId());
+        double sumPartitionsArrival = 0;
+        double sumPartitionsLag = 0;
+
+        // check
+        // what shall we do when a partition lag and the arrival while processing lag is greater
+        // than µ*wsla*f
+
+         double arrivalTopartition = partition.getLag()/(mu * f)* partition.getArrivalRate();
+        if(arrivalTopartition + partition.getLag() >= (mu * f)*wsla) {
+
+            partsReset.get(partition.getId()).setLag((long)(partition.getLag() - arrivalTopartition));
+        }
+
+        for (Partition p : consumer.getAssignedPartitions()) {
+            sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
+            sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
+        }
+        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (mu * f) *
+                (sumPartitionsArrival + partition.getArrivalRate());
+        double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
+
+        if (total <= mu * wsla * f) {
+            return true;
+        }
+        //  log.info("false");
+        return false;
+    }*/
+
+
+
+
+
 
 
     static int binPackAndScaled() {
