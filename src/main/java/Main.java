@@ -60,9 +60,9 @@ public class Main {
 
 
         //BinPackRestructure200.scaleAsPerBinPackRestructured();
-        BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
+       // BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
 
-
+        BinPackRestructure200new.scaleAsPerBinPackRestructured();
 
 
     }
