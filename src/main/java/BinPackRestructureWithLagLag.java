@@ -208,7 +208,7 @@ public class BinPackRestructureWithLagLag {
             int j;
             consumers.clear();
             for (int t = 0; t < consumerCount; t++) {
-                consumers.add(new Consumer((String.valueOf(consumerCount)),
+                consumers.add(new Consumer((String.valueOf(t)),
                         (long) (fractiondynamicAverageMaxConsumptionRate * wsla),
                         fractiondynamicAverageMaxConsumptionRate));
             }
