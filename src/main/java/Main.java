@@ -40,10 +40,10 @@ public class Main {
             scaleLogic();
             log.info("--------------------");
             log.info("--------------------");
-            log.info("Sleeping for 5 seconds");
+            log.info("Sleeping for 500 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(1000);
+            Thread.sleep(500);
         }
     }
 
@@ -65,7 +65,14 @@ public class Main {
        // BinPackRestructure200new.scaleAsPerBinPackRestructured();
 
 
-        BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
+        //BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
+
+
+       // BinPackRestructureWithLagLag2.scaleAsPerBinPackRestructured();
+
+
+        BinPackRestructureWithLagLag3.scaleAsPerBinPackRestructured();
+
 
 
 
