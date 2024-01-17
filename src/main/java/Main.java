@@ -26,7 +26,7 @@ public class Main {
         bpl = new BinPackLag();*/
 
        // bp = new BinPackRestructure();
-        bp = new BinPackRestructureWithLag();
+        //bp = new BinPackRestructureWithLag();
 
         Lag.readEnvAndCrateAdminClient();
         log.info("Warming 15  seconds.");
@@ -68,10 +68,15 @@ public class Main {
         //BinPackRestructureWithLagLag.scaleAsPerBinPackRestructured();
 
 
-       // BinPackRestructureWithLagLag2.scaleAsPerBinPackRestructured();
+      //  BinPackRestructureWithLagLag2.scaleAsPerBinPackRestructured();
 
 
-        BinPackRestructureWithLagLag3.scaleAsPerBinPackRestructured();
+        //BinPackRestructureWithLagLag3.scaleAsPerBinPackRestructured();
+
+
+
+        BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured();
+
 
 
 

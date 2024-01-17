@@ -4,14 +4,13 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLagLag2 {
+public class BinPackRestructureWithLagLag4 {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag2.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag4.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -31,7 +30,6 @@ public class BinPackRestructureWithLagLag2 {
         }
     }
 
-    public Instant LastUpScaleDecision = Instant.now();
 
     public static void scaleAsPerBinPackRestructured() {
         log.info("Currently we have this number of consumers group {} {}", "testgroup1", size);
@@ -49,7 +47,6 @@ public class BinPackRestructureWithLagLag2 {
                 }
                 currentAssignment = assignment;
                 size = neededsize;
-                logmetrics();
                 return;
             }
         } else {
@@ -60,8 +57,6 @@ public class BinPackRestructureWithLagLag2 {
                 log.info("We have to downscale  group by {} {}", "testgroup1", replicasForscaled);
                 currentAssignment = assignment;
                 size = neededsized;
-                logmetrics();
-
                 try (final KubernetesClient k8s = new KubernetesClientBuilder().build()) {
                     k8s.apps().deployments().inNamespace("default").withName("latency").scale(neededsized);
                     log.info("I have downscaled group {} you should have {}", "testgroup1", neededsized);
@@ -71,24 +66,7 @@ public class BinPackRestructureWithLagLag2 {
         log.info("===================================");
     }
 
-    private static void logmetrics() {
 
-        double suma=0;
-        double suml=0;
-        for (int i = 0; i < 5; i++) {
-             suml += partsReset.get(i).getLag();
-             suma += partsReset.get(i).getArrivalRate();
-            log.info( "partition {} has arrival rate {}", i, partsReset.get(i).getArrivalRate());
-            log.info( "partition {} has lag {}", i, partsReset.get(i).getLag());
-        }
-
-        log.info("total lag after is {}", suml);
-        log.info("total arrival rate is {}",suma);
-
-        /////////////////////////////////
-
-
-    }
 
 
     private static boolean assignmentViolatesTheSLA2() {
@@ -176,7 +154,7 @@ public class BinPackRestructureWithLagLag2 {
    //can we assign this partition to thsi consumer
     private static boolean isOK(Consumer consumer, Partition partition, double f) {
 
-       // log.info("consumer {}", consumer.getId());
+        log.info("consumer {}", consumer.getId());
         double sumPartitionsArrival = 0;
         double sumPartitionsLag = 0;
 
@@ -184,24 +162,24 @@ public class BinPackRestructureWithLagLag2 {
         // what shall we do when a partition lag and the arrival while processing lag is greater
         // than µ*wsla*f
 
-        double arrivalTopartition = partition.getLag()/(mu /** f*/)* partition.getArrivalRate();
-
+         double arrivalTopartition = partition.getLag()/(mu * f)* partition.getArrivalRate();
         if(arrivalTopartition + partition.getLag() >= (mu * f)*wsla) {
+
             partsReset.get(partition.getId()).setLag((long)(partition.getLag() - arrivalTopartition));
         }
 
-
-
         for (Partition p : consumer.getAssignedPartitions()) {
-            sumPartitionsArrival += partsReset.get(p.getId()).getArrivalRate();
-            sumPartitionsLag += partsReset.get(p.getId()).getLag();
+            sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
+            sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
         }
 
-
-
-        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (mu /** f*/) *
+        log.info("sumPartitionsArrival {}", sumPartitionsArrival);
+        log.info("sumPartitionsLag {}", sumPartitionsLag);
+        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (mu * f) *
                 (sumPartitionsArrival + partition.getArrivalRate());
 
+        log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
+        log.info("partition.getLag() {}", partition.getLag());
         double total = partition.getLag() + arrivalwhileprocessing + sumPartitionsLag;
 
         if (total <= mu * wsla * f) {

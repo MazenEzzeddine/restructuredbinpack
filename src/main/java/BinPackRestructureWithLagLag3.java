@@ -31,7 +31,6 @@ public class BinPackRestructureWithLagLag3 {
         }
     }
 
-    public Instant LastUpScaleDecision = Instant.now();
 
     public static void scaleAsPerBinPackRestructured() {
         log.info("Currently we have this number of consumers group {} {}", "testgroup1", size);
@@ -75,13 +74,13 @@ public class BinPackRestructureWithLagLag3 {
         for (Consumer cons : currentAssignment) {
             double sumPartitionsArrival = 0;
             double sumPartitionsLag = 0;
-            log.info("consumer {}", cons.getId());
+           // log.info("consumer {}", cons.getId());
             for (Partition p : cons.getAssignedPartitions()) {
-                log.info("partition {}", p.getId());
+               // log.info("partition {}", p.getId());
                 sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
                 sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
             }
-            double arrivalwhileprocessing = sumPartitionsLag / (mu * 0.9) * sumPartitionsArrival;
+            double arrivalwhileprocessing = sumPartitionsLag / (mu /** 0.9*/) * sumPartitionsArrival;
 
             if ((sumPartitionsLag + arrivalwhileprocessing) > (wsla * mu * .9f)
                 /*|| sumPartitionsArrival >=mu * 0.9f*/) {
