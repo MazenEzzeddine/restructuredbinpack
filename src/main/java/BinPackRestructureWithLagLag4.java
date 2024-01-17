@@ -162,7 +162,7 @@ public class BinPackRestructureWithLagLag4 {
         // what shall we do when a partition lag and the arrival while processing lag is greater
         // than µ*wsla*f
 
-         double arrivalTopartition = partition.getLag()/(mu * f)* partition.getArrivalRate();
+         double arrivalTopartition = partition.getLag()/(mu /** f*/)* partition.getArrivalRate();
         if(arrivalTopartition + partition.getLag() >= (mu * f)*wsla) {
 
             partsReset.get(partition.getId()).setLag((long)(partition.getLag() - arrivalTopartition));
@@ -175,7 +175,7 @@ public class BinPackRestructureWithLagLag4 {
 
         log.info("sumPartitionsArrival {}", sumPartitionsArrival);
         log.info("sumPartitionsLag {}", sumPartitionsLag);
-        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (mu * f) *
+        double arrivalwhileprocessing = (sumPartitionsLag + partition.getLag()) / (mu /** f*/) *
                 (sumPartitionsArrival + partition.getArrivalRate());
 
         log.info("arrivalwhileprocessing {}", arrivalwhileprocessing);
