@@ -161,7 +161,6 @@ public class BinPackRestructureWithLagLag8 {
 
 
         log.info("Uniform note:");
-
         for (Partition p : partsReset) {
             p.setLag((long)lagPerPartition);
 
