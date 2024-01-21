@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLagLag4 {
+public class BinPackRestructureWithLagLag6 {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag4.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag6.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -101,6 +101,26 @@ public class BinPackRestructureWithLagLag4 {
 
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
+
+        for (Consumer cons : currentAssignment) {
+            double totallag = cons.getCurrentLag();
+            double totalpart = cons.getAssignedPartitions().size();
+            double actuallag = Math.max(0, totallag - mu );
+
+            double lagPerpartition = actuallag/totalpart;
+
+            log.info("Uniform note:");
+
+            for (Partition part : cons.getAssignedPartitions()) {
+
+
+                partsReset.get(part.getId()).setLag((long)lagPerpartition);
+                log.info("actual lag of partition {} is {}", part.getId(), partsReset.get(part.getId()));
+            }
+
+
+
+        }
         for (Partition partition : partsReset) {
             if (partition.getLag() > mu * wsla * f) {
                 log.info("Since partition {} has lag {} higher than consumer capacity times wsla {}" + " we are truncating its lag",
@@ -141,8 +161,8 @@ public class BinPackRestructureWithLagLag4 {
                 Collections.sort(consumers, Collections.reverseOrder());
                 for (i = 0; i < consumerCount; i++) {
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag() &&
-                            consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
-                            isOK(consumers.get(i), partsReset.get(j), fraction)) {
+                            consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() /*&&
+                            isOK(consumers.get(i), partsReset.get(j), fraction)*/) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }
@@ -234,8 +254,8 @@ public class BinPackRestructureWithLagLag4 {
                 for (i = 0; i < consumerCount; i++) {
 
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag()
-                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
-                            isOK(consumers.get(i), partsReset.get(j), 0.4)) {
+                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() /*&&
+                            isOK(consumers.get(i), partsReset.get(j), 0.4)*/) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }

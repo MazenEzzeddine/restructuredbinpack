@@ -36,6 +36,32 @@ public class Consumer implements Comparable<Consumer> {
         remainingArrivalCapacity -= partition.getArrivalRate();
     }
 
+
+    public long getCurrentLag() {
+
+        long totalLag=0;
+        for (Partition p  : this.getAssignedPartitions()) {
+            totalLag += p.getLag();
+        }
+
+        return totalLag;
+
+    }
+
+
+    public double getCurrentArrivalRate() {
+
+
+        double  totalArrivalRate=0;
+        for (Partition p  : this.getAssignedPartitions()) {
+            totalArrivalRate += p.getArrivalRate();
+        }
+
+        return totalArrivalRate;
+
+
+    }
+
     @Override
     public String toString() {
         return "\nConsumer{" + "id=" + id +

@@ -26,11 +26,12 @@ public class Main {
         bpl = new BinPackLag();*/
 
        // bp = new BinPackRestructure();
-        //bp = new BinPackRestructureWithLag();
+        bp = new BinPackRestructureWithLag();
 
         Lag.readEnvAndCrateAdminClient();
         log.info("Warming 15  seconds.");
         Thread.sleep(15 * 1000);
+
 
 
         while (true) {
@@ -43,7 +44,7 @@ public class Main {
             log.info("Sleeping for 500 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(500);
+            Thread.sleep(1000);
         }
     }
 
@@ -75,9 +76,33 @@ public class Main {
 
 
 
-        BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured();
+       // BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured();
 
 
+
+        //BinPackRestructureWithLagLag6.scaleAsPerBinPackRestructured();
+
+       // BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured(); // new model with lamda
+
+        BinPackRestructureWithLagLag8.scaleAsPerBinPackRestructured(); // new model without lamda
+
+
+
+
+/*
+
+              if  (Duration.between(BinPackRestructureWithLagLag6.LastUpScaleDecision, Instant.now()).getSeconds() > 5) {
+                 // BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured(); a tester
+
+                  BinPackRestructureWithLagLag6.scaleAsPerBinPackRestructured();
+
+
+        } else {
+            log.info("No scale group 1 cooldown");
+        }
+
+
+*/
 
 
 
