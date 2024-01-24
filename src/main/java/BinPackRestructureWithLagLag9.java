@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLagLag8 {
+public class BinPackRestructureWithLagLag9 {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag8.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag9.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -153,7 +153,8 @@ public class BinPackRestructureWithLagLag8 {
 
         }*/
 
-        double totallag = Lag.totalLag;
+
+       /* double totallag = Lag.totalLag;
         double actuallag = Math.max(0,  totallag - mu*size );
 
         double lagPerPartition = Math.ceil(actuallag/5.0);
@@ -165,7 +166,7 @@ public class BinPackRestructureWithLagLag8 {
 
             log.info("actual lag of partition {} is {}", p.getId(), partsReset.get(p.getId()));
 
-        }
+        }*/
 
 
         for (Partition partition : partsReset) {
@@ -301,7 +302,7 @@ public class BinPackRestructureWithLagLag8 {
                 for (i = 0; i < consumerCount; i++) {
 
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag()
-                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
+                            /*&& consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate()*/ &&
                             isOK(consumers.get(i), partsReset.get(j), 0.4)) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
