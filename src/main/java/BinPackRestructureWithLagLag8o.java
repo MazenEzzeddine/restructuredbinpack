@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BinPackRestructureWithLagLag8 {
+public class BinPackRestructureWithLagLag8o {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag8.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag8o.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -79,30 +79,34 @@ public class BinPackRestructureWithLagLag8 {
 
 
 
-    private static boolean assignmentViolatesTheSLA2() {
-
-        partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
 
 
 
-        for (Consumer cons : currentAssignment) {
-            double sumPartitionsArrival = 0;
-            double sumPartitionsLag = 0;
-           // log.info("consumer {}", cons.getId());
-            for (Partition p : cons.getAssignedPartitions()) {
-               // log.info("partition {}", p.getId());
-                sumPartitionsArrival += partsReset.get(p.getId()).getArrivalRate();//ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
-                sumPartitionsLag += partsReset.get(p.getId()).getLag();//ArrivalProducer.topicpartitions.get(p.getId()).getLag();
+        private static boolean assignmentViolatesTheSLA2() {
+            for (Consumer cons : currentAssignment) {
+                double sumPartitionsArrival = 0;
+                double sumPartitionsLag = 0;
+                for (Partition p : cons.getAssignedPartitions()) {
+                    sumPartitionsArrival += ArrivalProducer.topicpartitions.get(p.getId()).getArrivalRate();
+                    sumPartitionsLag += ArrivalProducer.topicpartitions.get(p.getId()).getLag();
+                }
+
+                log.info("consumer co {}, lagsum {}, arrival sum {}", cons.getId(), sumPartitionsLag, sumPartitionsArrival);
+
+                if (sumPartitionsLag >  (wsla * mu * .9f) /*||
+                        sumPartitionsArrival > mu * 0.9f*/) {
+                    log.info("Assignment violates the SLA");
+                    return true;
+                }
             }
-            double arrivalwhileprocessing = sumPartitionsLag / (mu /** 0.9*/) * sumPartitionsArrival;
-
-            if ((sumPartitionsLag + arrivalwhileprocessing) > (wsla * mu * .9f)
-                /*|| sumPartitionsArrival >=mu * 0.9f*/) {
-                return true;
-            }
+            log.info("Assignment  does NOT  violates the SLA");
+            return false;
         }
-        return false;
-    }
+
+
+
+
+
 
     private static void resetPartitions(float f) {
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
@@ -148,8 +152,8 @@ public class BinPackRestructureWithLagLag8 {
                 Collections.sort(consumers, Collections.reverseOrder());
                 for (i = 0; i < consumerCount; i++) {
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag() &&
-                            consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
-                            isOK(consumers.get(i), partsReset.get(j), fraction)) {
+                            consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() /*&&
+                            isOK(consumers.get(i), partsReset.get(j), fraction)*/) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }
@@ -241,8 +245,8 @@ public class BinPackRestructureWithLagLag8 {
                 for (i = 0; i < consumerCount; i++) {
 
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag()
-                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
-                            isOK(consumers.get(i), partsReset.get(j), 0.4)) {
+                            && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() /*&&
+                            isOK(consumers.get(i), partsReset.get(j), 0.4)*/) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }

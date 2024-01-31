@@ -44,7 +44,10 @@ public class Main {
             log.info("Sleeping for 500 seconds");
             log.info("******************************************");
             log.info("******************************************");
-            Thread.sleep(1000);
+            //Thread.sleep(1000);
+
+            Thread.sleep(500);
+
         }
     }
 
@@ -84,7 +87,16 @@ public class Main {
 
        // BinPackRestructureWithLagLag4.scaleAsPerBinPackRestructured(); // new model with lamda
 
-        BinPackRestructureWithLagLag8.scaleAsPerBinPackRestructured(); // new model without lamda
+        //BinPackRestructureWithLagLag8.scaleAsPerBinPackRestructured(); // new model without lamda
+
+
+       // BinPackRestructureWithLagLag8.scaleAsPerBinPackRestructured(); //new model
+
+        //BinPackRestructureWithLagLag8o.scaleAsPerBinPackRestructured();  //old model
+
+
+        BinPackRestructureWithLagLag8p.scaleAsPerBinPackRestructured(); //new model
+
 
 
 

@@ -8,10 +8,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
-public class BinPackRestructureWithLagLag8 {
+public class BinPackRestructureWithLagLag10 {
 
-    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag8.class);
+    private static final Logger log = LogManager.getLogger(BinPackRestructureWithLagLag10.class);
     public static int size = 1;
     static double wsla = 0.5;
     static double rebTime = 2.0;
@@ -40,7 +41,7 @@ public class BinPackRestructureWithLagLag8 {
     public static void scaleAsPerBinPackRestructured() {
         log.info("Currently we have this number of consumers group {} {}", "testgroup1", size);
         if (assignmentViolatesTheSLA2()) {
-            resetPartitions(0.9f);
+            resetPartitions(0.5f);
             int neededsize = binPackAndScale();
             log.info("We currently need the following consumers for group1 (as per the bin pack) {}", neededsize);
             int replicasForscale = neededsize - size;
@@ -56,9 +57,17 @@ public class BinPackRestructureWithLagLag8 {
                 LastUpScaleDecision =Instant.now();
 
                 return;
+            } else if(replicasForscale == 0) {
+                if (metadataConsumer == null) {
+                    KafkaConsumerConfig config = KafkaConsumerConfig.fromEnv();
+                    Properties props = KafkaConsumerConfig.createProperties(config);
+                    metadataConsumer = new KafkaConsumer<>(props);
+                }
+                currentAssignment = assignment;
+                metadataConsumer.enforceRebalance();
             }
         } else {
-            resetPartitions(0.4f);
+            resetPartitions(0.3f);
             int neededsized = binPackAndScaled();
             int replicasForscaled = size - neededsized;
             if (replicasForscaled > 0) {
@@ -82,7 +91,6 @@ public class BinPackRestructureWithLagLag8 {
     private static boolean assignmentViolatesTheSLA2() {
 
         partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
-
 
 
         for (Consumer cons : currentAssignment) {
@@ -129,7 +137,7 @@ public class BinPackRestructureWithLagLag8 {
         log.info(" shall we upscale group {}", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
-        float fraction = 0.9f;
+        float fraction = 0.5f;
 
 
         while (true) {
@@ -159,7 +167,8 @@ public class BinPackRestructureWithLagLag8 {
                     break;
                 }
             }
-            if (j == partsReset.size()) break;
+            if (j == partsReset.size())
+                break;
         }
         assignment = consumers;
         log.info(" The BP up scaler recommended for group {} {}", "testgroup1", consumers.size());
@@ -219,13 +228,13 @@ public class BinPackRestructureWithLagLag8 {
         log.info(" shall we down scale group {} ", "testgroup1");
         List<Consumer> consumers = new ArrayList<>();
         int consumerCount = 1;
-        double fractiondynamicAverageMaxConsumptionRate = mu * 0.4;
+        double fractiondynamicAverageMaxConsumptionRate = mu * 0.3;
 
         //start the bin pack FFD with sort
         //Collections.sort(partsReset, Collections.reverseOrder());
         while (true) {
             partsReset = new ArrayList<>(ArrivalProducer.topicpartitions);
-            resetPartitions(0.4f);
+            resetPartitions(0.3f);
             Collections.sort(partsReset, Collections.reverseOrder());
             int j;
             consumers.clear();
@@ -242,7 +251,7 @@ public class BinPackRestructureWithLagLag8 {
 
                     if (consumers.get(i).getRemainingLagCapacity() >= partsReset.get(j).getLag()
                             && consumers.get(i).getRemainingArrivalCapacity() >= partsReset.get(j).getArrivalRate() &&
-                            isOK(consumers.get(i), partsReset.get(j), 0.4)) {
+                            isOK(consumers.get(i), partsReset.get(j), 0.3)) {
                         consumers.get(i).assignPartition(partsReset.get(j));
                         break;
                     }
